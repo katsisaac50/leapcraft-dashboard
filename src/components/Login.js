@@ -1,9 +1,40 @@
 import React, { Component } from 'react'
 import { Form, Col, Button, FormGroup, FormControl, ControlLabel, Checkbox } from 'react-bootstrap'
+import {post, get } from 'axios';
 
 class Login extends Component {
     handleChange(){}
-    handleSubmit(){}
+    
+    handleSubmit = e => {
+        e.preventDefault();    
+        post("https://dashboard.cphsense.com/api/v2/auth/new", {
+            // credentials set from here to be set to the server
+            username: e.target.email.value,
+            password: e.target.password.value
+        })
+        .then(res => {
+            console.log(res)
+            const token = res.data.access_token
+            // defaults.headers.common['Authorization'] = `Bearer ${ token }`;
+            return get("https://dashboard.cphsense.com/api/v2/devices/", {
+                headers: {
+                    Authorization: `Bearer ${ token }`
+                }
+            })
+        })
+        .then(res => {
+            // this.props.devicesData(res.data)
+            // this.setState({devices: res.data});
+            // this.setState({ redirectToReferrer: true });
+            this.props.setDevices(res.data);
+            this.props.history.push('/devices');
+        })
+        .catch(console.log)
+        // this.setState({
+        //     email: "",
+        //     password: ""
+        // })
+    }
 
     render () {
         return (
